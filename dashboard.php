@@ -1,12 +1,8 @@
-<!-- If session isn't valid, redirect to login-->
 <?php session_start();
 if (!isset($_SESSION['valid'])) {
-    header('Location: login.php');
+    header('Location: ./login.php');
 }
-$valid = $_SESSION['valid'];
-exit;
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -14,11 +10,24 @@ exit;
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - phpcrud</title>
+    <link rel="stylesheet" href="./style/formPage.css">
+    <title>Dasboard - PHPCRUD</title>
 </head>
 
 <body>
-    <p>Welcome <strong><?php echo $valid['name'] ?></strong> <br> <a href='logout.php'>Logout</a><br /></p>
+
+    <div class="container">
+        <div class="content">
+            <p>Welkom <?php echo htmlspecialchars($_SESSION['name']) ?></p>
+            <p>
+                <a href='logout.php'>Uitloggen</a>
+                &ThickSpace; | &ThickSpace;
+                <a href='profile.php'>Profiel aanpassen</a>
+                &ThickSpace; | &ThickSpace;
+                <a href='delete.php'>Profiel verwijderen</a>
+            </p>
+        </div>
+    </div>
 </body>
 
 </html>

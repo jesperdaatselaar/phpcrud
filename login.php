@@ -1,67 +1,70 @@
-  <?php session_start();
+<?php session_start();
+if (isset($_SESSION['valid'])) {
+    header('Location: ./dashboard.php');
+}
 
-    /** @var mysqli $db */
-    require_once "includes/db.php";
+include("connection.php");
 
-    if (isset($_SESSION['valid'])) {
-        header("Location: dashboard.php");
-        exit;
-    }
+if (isset($_POST['submit'])) {
+    $user = mysqli_real_escape_string($mysqli, $_POST['email']);
+    $pass = mysqli_real_escape_string($mysqli, $_POST['password']);
 
-    print_r("HELP");
+    if ($user == "" || $pass == "") {
+        echo "Either username or password field is empty.";
+    } else {
+        $result = mysqli_query($mysqli, "SELECT * FROM login WHERE email='$user'")
+            or die("Could not execute the select query.");
+        $row = mysqli_fetch_assoc($result);
 
-    //If form is posted, lets validate!
-    if (isset($_POST['submit'])) {
-        $mail = mysqli_escape_string($db, $_POST['mail']);
-        $pwd = $_POST['pwd'];
-
-        $err = [];
-
-        $query = "SELECT * FROM users WHERE email = '$mail'";
-        $result = mysqli_query($db, $query) or die($err['db'] = mysqli_error($db));
-        $user = mysqli_fetch_assoc($result);
-
-        if ($user) {
-            if ($pwd =  $user['pwd']) { // DONT FORGET THE HASHING
-                // Create session
-                $_SESSION['valid'] = [
-                    'name' => $user['name'],
-                    'id' => $user['id']
-                ];
-
-                header("Location: dashboard.php");
-                exit;
-            } else {
-                $err['fields'] = 'Uw logingegevens zijn onjuist';
-                print_r("HELP");
-            }
+        if (is_array($row) && !empty($row) && password_verify($pass, $row['password'])) {
+            $validuser = $row['email'];
+            $_SESSION['valid'] = $validuser;
+            $_SESSION['name'] = $row['name'];
+            $_SESSION['id'] = $row['id'];
         } else {
-            $err['fields'] = 'Uw logingegevens zijn onjuist';
-            print_r("HELP");
+            echo "Wat kun je wel he?";
+            // header("Location: ./login.php");
+        }
+
+        if (isset($_SESSION['valid'])) {
+            header('Location: ./dashboard.php');
         }
     }
-    ?>
-  <!DOCTYPE html>
-  <html lang="en">
+}
+?>
+<!DOCTYPE html>
+<html lang="en">
 
-  <head>
-      <meta charset="UTF-8">
-      <meta http-equiv="X-UA-Compatible" content="IE=edge">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Login - phpcrud</title>
-  </head>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./style//formPage.css">
+    <title>Inloggen</title>
+</head>
 
-  <body>
-      <h1>Login</h1>
-      <span><?= isset($err['db']) ? "<strong>Foutmelding: </strong>" . $err['db'] : ''; ?></span>
-      <span><?= isset($err['fields']) ? "<strong>Foutmelding: </strong>" . $err['fields'] : ''; ?></span>
-      <form action="<?= $_SERVER['REQUEST_URI'] ?>" method="post">
-          <div class="field">
-              <input name="mail" type="email" placeholder="Mail">
-              <input name="pwd" type="password" placeholder="Wachtwoord">
-              <input type="submit" value="Login">
-          </div>
-      </form>
-  </body>
+<body>
+    <div class="container">
+        <div class="content">
+            <h1>Inloggen</h1>
+            <form action="" method="POST">
+                <div class="row">
+                    <label for="email">Email</label> <br>
+                    <input required id="email" type="email" name="email" maxlength="64">
+                </div>
+                <div class="row">
+                    <label for="password">Wachtwoord</label> <br>
+                    <input required id="password" type="password" name="password" minlength="8">
+                </div>
+                <div class="row">
+                    <input name="submit" type="submit" value="Inloggen">
+                </div>
+                <div class="row">
+                    <p>Nog geen account? <a href="./register.php">Registreer!</a></p>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
 
-  </html>
+</html>
